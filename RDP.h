@@ -30,12 +30,6 @@ class RDP
         return c >= '0' && c <= '9';
     }
 
-public:
-    RDP(ifstream& fp);
-    ~RDP();
-
-    void parse();
-
     void getNextSymbol();
 
     void pSPL_PROGRAM();
@@ -52,5 +46,12 @@ public:
     void pEXP();
     void pTERM();
     void pFACTOR();
+
+public:
+    RDP(ifstream& fp);
+    ~RDP();
+
+    void parse();
+
 };
 

@@ -31,5 +31,7 @@ int main(int argc, char *argv[])
     RDP rdp(fp);
     rdp.parse();
 
+    fp.close();
+
     return 0;
 }

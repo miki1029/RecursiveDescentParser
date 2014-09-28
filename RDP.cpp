@@ -12,13 +12,6 @@ RDP::~RDP()
 }
 
 
-void RDP::error(int errnum)
-{
-    cout << errnum << endl;
-    exit(1);
-}
-
-
 void RDP::parse()
 {
     cout << endl << "    *** Left Parse ***" << endl << endl;
@@ -28,6 +21,74 @@ void RDP::parse()
         cout << endl << "    *** Accept ***" << endl;
     else
         cout << endl << "    *** Invalid source ***" << endl;
+}
+
+
+void RDP::error(int errnum)
+{
+    printf("    *** Syntax Error : ");
+    switch (errnum)
+    {
+    case 1:
+        cout << "next symbol bust be 'begin'" << endl;
+        break;
+    case 2:
+        cout << "next symbol bust be '.'" << endl;
+        break;
+    case 3:
+        cout << "next symbol bust be ';'" << endl;
+        break;
+    case 4:
+        cout << "next symbol bust be <id> | <number> | '(' | 'input' | 'goto' | 'if' | 'output' | 'begin'" << endl;
+        break;
+    case 5:
+        cout << "next symbol bust be 'end'" << endl;
+        break;
+    case 6:
+        cout << "next symbol bust be 'label' | 'integer'" << endl;
+        break;
+    case 7:
+        cout << "next symbol bust be <id>" << endl;
+        break;
+    case 8:
+        cout << "next symbol bust be ':'" << endl;
+        break;
+    case 9:
+        cout << "next symbol bust be ')'" << endl;
+        break;
+    case 10:
+        cout << "next symbol bust be '<' | '>' | '='" << endl;
+        break;
+    case 11:
+        cout << "next symbol bust be 'input' | <id> | <number> | '('" << endl;
+        break;
+    case 12:
+        cout << "next symbol bust be '=>'" << endl;
+        break;
+    case 13:
+        cout << "next symbol bust be 'goto'" << endl;
+        break;
+    case 14:
+        cout << "next symbol bust be 'if'" << endl;
+        break;
+    case 15:
+        cout << "next symbol bust be 'then'" << endl;
+        break;
+    case 16:
+        cout << "next symbol bust be 'fi'" << endl;
+        break;
+    case 17:
+        cout << "next symbol bust be 'output'" << endl;
+        break;
+    case 18:
+        cout << "next symbol bust be '('" << endl;
+        break;
+    case 100:
+        cout << "<id> must start letter" << endl;
+    default:
+        cout << "unknown error" << endl;
+    }
+    exit(1);
 }
 
 
@@ -140,6 +201,7 @@ void RDP::pBLOCK()
         }
 
         if (nextSymbol == tid || nextSymbol == tinput ||
+            nextSymbol == tnumber || nextSymbol == tlparenthsis ||
             nextSymbol == tgoto || nextSymbol == tif ||
             nextSymbol == toutput || nextSymbol == tbegin)
         {
@@ -150,7 +212,7 @@ void RDP::pBLOCK()
                 error(5); // tend
         }
         else
-            error(4); // tid, tinput, tgoto, tif, toutput, tbegin
+            error(4); // tid, tinput, tnumber, tlparenthsis, tgoto, tif, toutput, tbegin
     }
     else
         error(1); // tbegin
@@ -186,6 +248,7 @@ void RDP::pDCL()
 void RDP::pST_LIST()
 {
     if (nextSymbol == tid || nextSymbol == tinput ||
+        nextSymbol == tnumber || nextSymbol == tlparenthsis ||
         nextSymbol == tgoto || nextSymbol == tif ||
         nextSymbol == toutput || nextSymbol == tbegin)
     {
@@ -195,15 +258,16 @@ void RDP::pST_LIST()
         {
             getNextSymbol();
             if (nextSymbol == tid || nextSymbol == tinput ||
+                nextSymbol == tnumber || nextSymbol == tlparenthsis ||
                 nextSymbol == tgoto || nextSymbol == tif ||
                 nextSymbol == toutput || nextSymbol == tbegin)
                 pST();
             else
-                error(4); // tid, tinput, tgoto, tif, toutput, tbegin
+                error(4); // tid, tinput, tnumber, tlparenthsis, tgoto, tif, toutput, tbegin
         }
     }
     else
-        error(4); // tid, tinput, tgoto, tif, toutput, tbegin
+        error(4); // tid, tinput, tnumber, tlparenthsis, tgoto, tif, toutput, tbegin
 }
 
 
@@ -211,6 +275,7 @@ void RDP::pST()
 {
     // apply 전용 조건문
     if (nextSymbol == tid || nextSymbol == tinput ||
+        nextSymbol == tnumber || nextSymbol == tlparenthsis ||
         nextSymbol == tgoto || nextSymbol == tif ||
         nextSymbol == toutput || nextSymbol == tbegin)
         apply(5);
@@ -224,18 +289,20 @@ void RDP::pST()
             error(8); // tcolon
     }
 
-    if (nextSymbol == tinput ||
+    if (nextSymbol == tid || nextSymbol == tinput ||
+        nextSymbol == tnumber || nextSymbol == tlparenthsis ||
         nextSymbol == tgoto || nextSymbol == tif ||
         nextSymbol == toutput || nextSymbol == tbegin)
         pSTATEMENT();
     else
-        error(9); // tinput, tgoto, tif, toutput, tbegin
+        error(4); // tid, tinput, tnumber, tlparenthsis, tgoto, tif, toutput, tbegin
 }
 
 
 void RDP::pSTATEMENT()
 {
-    if (nextSymbol == tinput)
+    if (nextSymbol == tid || nextSymbol == tinput ||
+        nextSymbol == tnumber || nextSymbol == tlparenthsis)
     {
         apply(6);
         pASSIGNMENT();
@@ -261,7 +328,7 @@ void RDP::pSTATEMENT()
         pBLOCK();
     }
     else
-        error(10); // tinput, tgoto, tif, toutput, tbegin
+        error(4); // tid, tinput, tnumber, tlparenthsis, tgoto, tif, toutput, tbegin
 }
 
 
@@ -318,6 +385,7 @@ void RDP::pIF_ST()
     if (nextSymbol == tif)
     {
         apply(9);
+        getNextSymbol();
         if (nextSymbol == tinput || nextSymbol == tid ||
             nextSymbol == tnumber || nextSymbol == tlparenthsis)
         {
@@ -326,6 +394,7 @@ void RDP::pIF_ST()
             {
                 getNextSymbol();
                 if (nextSymbol == tid || nextSymbol == tinput ||
+                    nextSymbol == tnumber || nextSymbol == tlparenthsis ||
                     nextSymbol == tgoto || nextSymbol == tif ||
                     nextSymbol == toutput || nextSymbol == tbegin)
                 {
@@ -336,11 +405,12 @@ void RDP::pIF_ST()
                         getNextSymbol();
 
                         if (nextSymbol == tid || nextSymbol == tinput ||
+                            nextSymbol == tnumber || nextSymbol == tlparenthsis ||
                             nextSymbol == tgoto || nextSymbol == tif ||
                             nextSymbol == toutput || nextSymbol == tbegin)
                             pST_LIST();
                         else
-                            error(4); // tid, tinput, tgoto, tif, toutput, tbegin
+                            error(4); // tid, tinput, tnumber, tlparenthsis, tgoto, tif, toutput, tbegin
                     }
 
                     if (nextSymbol == tfi)
@@ -349,13 +419,13 @@ void RDP::pIF_ST()
                         error(16); // tfi
                 }
                 else
-                    error(4); // tid, tinput, tgoto, tif, toutput, tbegin
+                    error(4); // tid, tinput, tnumber, tlparenthsis, tgoto, tif, toutput, tbegin
             }
             else
                 error(15); // tthen
         }
         else
-            error(21); // tinput, tid, tnumber, tlparenthsis
+            error(11); // tinput, tid, tnumber, tlparenthsis
     }
     else
         error(14); // tif
@@ -390,7 +460,7 @@ void RDP::pWRITE_ST()
                 if (nextSymbol == trparenthsis)
                     getNextSymbol();
                 else
-                    error(19); // trparenthsis
+                    error(9); // trparenthsis
             }
             else
                 error(11); // tinput, tid, tnumber, tlparenthsis
@@ -420,7 +490,7 @@ void RDP::pCONDITION()
                 error(11); // tinput, tid, tnumber, tlparenthsis
         }
         else
-            error(20); // tless, tgreat, tequal
+            error(10); // tless, tgreat, tequal
     }
     else
         error(11); // tinput, tid, tnumber, tlparenthsis
@@ -491,7 +561,7 @@ void RDP::pFACTOR()
             if (nextSymbol == trparenthsis)
                 getNextSymbol();
             else
-                error(19); // trparenthsis
+                error(9); // trparenthsis
         }
         else
             error(11); // tinput, tid, tnumber, tlparenthsis
