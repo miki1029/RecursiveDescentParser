@@ -2,5 +2,6 @@ begin
 	label miki , a1029 ;
 	integer i ;
 
-	output ( input + i )
+	output ( input + i ) ;
+	miki : begin if 5 * 10 = 50 then 30 => i fi end
 end .
