@@ -1,0 +1,6 @@
+begin
+	label miki , a1029 ;
+	integer i ;
+
+	output ( input + i )
+end .
